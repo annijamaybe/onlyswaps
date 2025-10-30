@@ -1,0 +1,98 @@
+body {
+  font-family: 'Comic Sans MS', sans-serif;
+  background-color: #ffe6f0;
+  color: #333;
+  margin: 0;
+  text-align: center;
+}
+
+header {
+  background: linear-gradient(to right, #ffb6c1, #ffcce0);
+  padding: 1.2em;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border-bottom: 4px solid #ffb6c1;
+}
+
+h1 {
+  margin: 0.3em 0;
+  font-size: 2.2em;
+}
+
+.tagline {
+  font-style: italic;
+  color: #6b3b3b;
+  margin-bottom: 1em;
+}
+
+nav button {
+  background-color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 0.6em 1.2em;
+  margin: 0.3em;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+nav button:hover {
+  background-color: #ffcce0;
+  transform: scale(1.05);
+}
+
+.page {
+  display: none;
+  padding: 2em;
+}
+
+.page.active {
+  display: block;
+}
+
+#chat-box {
+  border: 2px solid #ffb6c1;
+  height: 220px;
+  width: 80%;
+  margin: 0 auto 1em;
+  overflow-y: scroll;
+  background-color: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+#item-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+#item-list li {
+  background-color: #fff0f5;
+  border-radius: 10px;
+  margin: 5px auto;
+  padding: 10px;
+  width: 80%;
+  border: 1px solid #ffcce0;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+button {
+  background-color: #ffb6c1;
+  border: none;
+  border-radius: 15px;
+  padding: 0.5em 1.2em;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: #ff99bb;
+}
+
+footer {
+  background-color: #ffb6c1;
+  padding: 1em;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  font-size: 0.9em;
+}
