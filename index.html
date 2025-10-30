@@ -3,53 +3,68 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OnlySwaps 💖</title>
+  <title>OnlySwaps 💕</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>💖 OnlySwaps 💖</h1>
-    <p class="tagline">Swap it, don’t shop it!</p>
-    <nav>
-      <button onclick="showPage('swap')">Swaps</button>
-      <button onclick="showPage('chat')">Chat</button>
-      <button onclick="showPage('account')">Account</button>
-    </nav>
+    <h1>🌸 OnlySwaps 🌸</h1>
+    <p id="welcome">Welcome to OnlySwaps!</p>
   </header>
 
-  <main>
-    <!-- Swap Page -->
-    <section id="swap" class="page active">
-      <h2>🛍️ Items to Swap</h2>
-      <ul id="item-list"></ul>
+  <nav>
+    <button onclick="showPage('home')">Home</button>
+    <button onclick="showPage('add-swap')">Add Swap</button>
+    <button onclick="showPage('chatroom')">Chatroom</button>
+  </nav>
 
-      <h3>Add Your Item</h3>
-      <input type="text" id="item-name" placeholder="Item name..." />
-      <input type="text" id="item-desc" placeholder="Short description..." />
-      <input type="file" id="item-image" accept="image/*" />
-      <button onclick="addItem()">Add Item</button>
-    </section>
+  <!-- Home -->
+  <section id="home" class="page active">
+    <h2>Your Swaps 💫</h2>
+    <ul id="item-list"></ul>
+  </section>
 
-    <!-- Chat Page -->
-    <section id="chat" class="page">
-      <h2>💬 Swap Chatroom</h2>
-      <div id="chat-box"></div>
-      <input type="text" id="chat-input" placeholder="Type your message..." />
-      <button onclick="sendMessage()">Send</button>
-    </section>
+  <!-- Add Swap -->
+  <section id="add-swap" class="page">
+    <h2>Add a New Swap ✨</h2>
+    <label>Username:</label>
+    <input type="text" id="username" placeholder="Enter your name" />
+    <button onclick="login()">Save Name</button>
 
-    <!-- Account Page -->
-    <section id="account" class="page">
-      <h2>👤 OnlySwaps Account</h2>
-      <input type="text" id="username" placeholder="Enter your username" />
-      <button onclick="login()">Login / Sign Up</button>
-      <p id="welcome"></p>
-    </section>
-  </main>
+    <label>Item name:</label>
+    <input type="text" id="item-name" placeholder="What are you swapping?" />
 
-  <footer>
-    <p>© 2025 OnlySwaps — Made with 💕 for swapping only</p>
-  </footer>
+    <label>Material:</label>
+    <input type="text" id="item-material" placeholder="What material is it?" />
+
+    <label>Worth:</label>
+    <input type="text" id="item-worth" placeholder="How do you see it being worth?" />
+
+    <label>Notes:</label>
+    <input type="text" id="item-notes" placeholder="Anything else to add?" />
+
+    <label>Upload image:</label>
+    <input type="file" id="item-image" accept="image/*" />
+
+    <button onclick="addItem()">Add Item</button>
+  </section>
+
+  <!-- Chatroom -->
+  <section id="chatroom" class="page">
+    <h2>💬 Swap Chatroom</h2>
+    <div id="chat-box"></div>
+    <input type="text" id="chat-input" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+  </section>
+
+  <!-- Popup -->
+  <div id="popup">
+    <div id="popup-content">
+      <img id="popup-img" src="" alt="Item image" />
+      <div id="popup-info"></div>
+      <button onclick="closePopup()">Close</button>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
