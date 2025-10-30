@@ -18,14 +18,28 @@ function login() {
 function addItem() {
   const name = document.getElementById("item-name").value;
   const desc = document.getElementById("item-desc").value;
-  if (!name || !desc) return alert("Please fill in both fields!");
+  const imageInput = document.getElementById("item-image");
+  const file = imageInput.files[0];
 
-  const li = document.createElement("li");
-  li.innerHTML = `<strong>${name}</strong>: ${desc}`;
-  itemList.appendChild(li);
+  if (!name || !desc || !file) {
+    alert("Please fill in all fields and choose an image!");
+    return;
+  }
 
-  document.getElementById("item-name").value = "";
-  document.getElementById("item-desc").value = "";
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <img src="${e.target.result}" alt="${name}" class="item-img" />
+      <strong>${name}</strong>: ${desc}
+    `;
+    itemList.appendChild(li);
+
+    document.getElementById("item-name").value = "";
+    document.getElementById("item-desc").value = "";
+    document.getElementById("item-image").value = "";
+  };
+  reader.readAsDataURL(file);
 }
 
 function sendMessage() {
