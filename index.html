@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OnlySwaps 💖</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>💖 OnlySwaps 💖</h1>
+    <p class="tagline">Swap it, don’t shop it!</p>
+    <nav>
+      <button onclick="showPage('swap')">Swaps</button>
+      <button onclick="showPage('chat')">Chat</button>
+      <button onclick="showPage('account')">Account</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Swap Page -->
+    <section id="swap" class="page active">
+      <h2>🛍️ Items to Swap</h2>
+      <ul id="item-list"></ul>
+
+      <h3>Add Your Item</h3>
+      <input type="text" id="item-name" placeholder="Item name..." />
+      <input type="text" id="item-desc" placeholder="Short description..." />
+      <button onclick="addItem()">Add Item</button>
+    </section>
+
+    <!-- Chat Page -->
+    <section id="chat" class="page">
+      <h2>💬 Swap Chatroom</h2>
+      <div id="chat-box"></div>
+      <input type="text" id="chat-input" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
+    </section>
+
+    <!-- Account Page -->
+    <section id="account" class="page">
+      <h2>👤 OnlySwaps Account</h2>
+      <input type="text" id="username" placeholder="Enter your username" />
+      <button onclick="login()">Login / Sign Up</button>
+      <p id="welcome"></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 OnlySwaps — Made with 💕 for swapping only</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
