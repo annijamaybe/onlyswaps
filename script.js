@@ -2,6 +2,7 @@ let username = "";
 let chatBox = document.getElementById("chat-box");
 let itemList = document.getElementById("item-list");
 let editingItem = null;
+let swaps = JSON.parse(localStorage.getItem("swaps")) || [];
 
 function showPage(pageId) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
@@ -21,6 +22,7 @@ function addItem() {
   const material = document.getElementById("item-material").value.trim();
   const worth = document.getElementById("item-worth").value.trim();
   const notes = document.getElementById("item-notes").value.trim();
+  const category = document.getElementById("item-category").value;
   const file = document.getElementById("item-image").files[0];
 
   if (!name || !material || !worth || !notes || !file) {
@@ -30,28 +32,27 @@ function addItem() {
 
   const reader = new FileReader();
   reader.onload = function (e) {
-    const itemData = {
-      name,
-      material,
-      worth,
-      notes,
-      img: e.target.result,
-    };
-    createItemCard(itemData);
+    const itemData = { name, material, worth, notes, category, img: e.target.result };
+    swaps.push(itemData);
+    saveSwaps();
+    renderSwaps();
     showPopup(itemData);
     clearForm();
   };
   reader.readAsDataURL(file);
 }
 
-function createItemCard(itemData) {
+function createItemCard(itemData, index = swaps.length - 1) {
   const li = document.createElement("li");
+  li.setAttribute("data-index", index);
+  li.setAttribute("data-category", itemData.category);
   li.innerHTML = `
     <img src="${itemData.img}" alt="${itemData.name}" class="item-img" />
     <strong>${itemData.name}</strong><br>
-    <em>Material:</em> ${itemData.material}<br>
-    <em>Worth:</em> ${itemData.worth}<br>
-    <em>Notes:</em> ${itemData.notes}
+    <em>${itemData.category}</em><br>
+    Material: ${itemData.material}<br>
+    Worth: ${itemData.worth}<br>
+    Notes: ${itemData.notes}
     <div style="margin-top:8px;">
       <button onclick="editItem(this)">✏️ Edit</button>
       <button onclick="deleteItem(this)">🗑️ Delete</button>
@@ -61,51 +62,41 @@ function createItemCard(itemData) {
 }
 
 function editItem(button) {
-  const li = button.parentElement.parentElement;
-  const imgSrc = li.querySelector("img").src;
-  const [name, material, worth, notes] = Array.from(li.querySelectorAll("strong, em + text"))
-    .map(el => el.textContent);
+  const li = button.closest("li");
+  const index = li.getAttribute("data-index");
+  const item = swaps[index];
 
-  document.getElementById("item-name").value = name || "";
-  document.getElementById("item-material").value = li.innerHTML.match(/Material:<\/em>\s*(.*?)<br>/)?.[1] || "";
-  document.getElementById("item-worth").value = li.innerHTML.match(/Worth:<\/em>\s*(.*?)<br>/)?.[1] || "";
-  document.getElementById("item-notes").value = li.innerHTML.match(/Notes:<\/em>\s*(.*?)$/)?.[1] || "";
+  document.getElementById("item-name").value = item.name;
+  document.getElementById("item-material").value = item.material;
+  document.getElementById("item-worth").value = item.worth;
+  document.getElementById("item-notes").value = item.notes;
+  document.getElementById("item-category").value = item.category;
 
-  editingItem = { li, imgSrc };
+  editingItem = index;
   window.scrollTo(0, 0);
-  alert("Edit your item details and click 'Save Changes' below!");
+  alert("Edit your item and click 'Save Changes'!");
 
-  // Change Add button to Save
   const addButton = document.querySelector("button[onclick='addItem()']");
   addButton.textContent = "Save Changes";
   addButton.onclick = saveEdit;
 }
 
 function saveEdit() {
-  if (!editingItem) return;
+  if (editingItem === null) return;
 
   const name = document.getElementById("item-name").value.trim();
   const material = document.getElementById("item-material").value.trim();
   const worth = document.getElementById("item-worth").value.trim();
   const notes = document.getElementById("item-notes").value.trim();
+  const category = document.getElementById("item-category").value;
 
-  const li = editingItem.li;
-  const img = editingItem.imgSrc;
+  const updatedItem = { ...swaps[editingItem], name, material, worth, notes, category };
+  swaps[editingItem] = updatedItem;
+  saveSwaps();
+  renderSwaps();
 
-  li.innerHTML = `
-    <img src="${img}" alt="${name}" class="item-img" />
-    <strong>${name}</strong><br>
-    <em>Material:</em> ${material}<br>
-    <em>Worth:</em> ${worth}<br>
-    <em>Notes:</em> ${notes}
-    <div style="margin-top:8px;">
-      <button onclick="editItem(this)">✏️ Edit</button>
-      <button onclick="deleteItem(this)">🗑️ Delete</button>
-    </div>
-  `;
-
-  clearForm();
   editingItem = null;
+  clearForm();
 
   const addButton = document.querySelector("button[onclick='saveEdit()']");
   addButton.textContent = "Add Item";
@@ -113,20 +104,46 @@ function saveEdit() {
 }
 
 function deleteItem(button) {
-  if (confirm("Are you sure you want to delete this item?")) {
-    button.parentElement.parentElement.remove();
+  const li = button.closest("li");
+  const index = li.getAttribute("data-index");
+  if (confirm("Delete this swap?")) {
+    swaps.splice(index, 1);
+    saveSwaps();
+    renderSwaps();
   }
+}
+
+function saveSwaps() {
+  localStorage.setItem("swaps", JSON.stringify(swaps));
+}
+
+function renderSwaps() {
+  itemList.innerHTML = "";
+  swaps.forEach((item, index) => createItemCard(item, index));
+  filterSwaps();
+}
+
+function filterSwaps() {
+  const selected = document.getElementById("filter-category").value;
+  document.querySelectorAll("#item-list li").forEach(li => {
+    if (selected === "all" || li.getAttribute("data-category") === selected) {
+      li.style.display = "block";
+    } else {
+      li.style.display = "none";
+    }
+  });
 }
 
 function showPopup(item) {
   document.getElementById("popup-img").src = item.img;
   document.getElementById("popup-info").innerHTML = `
     <strong>${item.name}</strong><br>
+    Category: ${item.category}<br>
     Material: ${item.material}<br>
     Worth: ${item.worth}<br>
     Notes: ${item.notes}
   `;
-  document.getElementById("popup").style.display = "block";
+  document.getElementById("popup").style.display = "flex";
 }
 
 function closePopup() {
@@ -157,6 +174,8 @@ window.onload = () => {
   const savedName = localStorage.getItem("username");
   if (savedName) {
     username = savedName;
-    document.getElementById("welcome").innerText = `Welcome back to OnlySwaps, ${username}! 💕`;
+    document.getElementById("welcome").innerText = `Welcome back, ${username}! 💕`;
   }
+  renderSwaps();
 };
+
