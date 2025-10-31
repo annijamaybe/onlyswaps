@@ -1,101 +1,257 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OnlySwaps 💕</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header>
-    <h1>OnlySwaps 💕</h1>
-    <p id="welcome">Welcome to OnlySwaps!</p>
-  </header>
+let username = "";
+let chatBox = document.getElementById("chat-box");
+let itemList = document.getElementById("item-list");
+let editingItem = null;
+let swaps = JSON.parse(localStorage.getItem("swaps")) || [];
 
-  <!-- 🌟 Featured Swap -->
-  <section id="featured-swap">
-    <div class="featured-content">
-      <h2>🌟 Featured Swap</h2>
-      <div id="featured-card" class="featured-card">
-        <p>✨ Add your first swap to see it featured here!</p>
-      </div>
+/* 🌸 Switch pages */
+function showPage(pageId) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(pageId).classList.add("active");
+}
+
+/* 💕 Login */
+function login() {
+  username = document.getElementById("username").value.trim();
+  if (username) {
+    document.getElementById("welcome").innerText = `Welcome to OnlySwaps, ${username}! 💕`;
+    localStorage.setItem("username", username);
+  }
+}
+
+/* 🌷 Update category fields */
+function updateCategoryFields() {
+  const category = document.getElementById("item-category").value;
+  const fieldsDiv = document.getElementById("category-fields");
+  fieldsDiv.innerHTML = "";
+
+  if (category === "clothes") {
+    fieldsDiv.innerHTML = `
+      <label>What material is it?</label>
+      <input id="item-material" placeholder="e.g. cotton" />
+      <label>How worn out is it?</label>
+      <input id="item-wear" placeholder="e.g. lightly used" />
+      <label>What colour is it?</label>
+      <input id="item-colour" placeholder="e.g. pastel pink" />
+    `;
+  } else if (category === "books") {
+    fieldsDiv.innerHTML = `
+      <label>What genre is it?</label>
+      <input id="item-genre" placeholder="e.g. fantasy" />
+      <label>How long have you had it?</label>
+      <input id="item-time" placeholder="e.g. 2 years" />
+      <label>Your personal rating?</label>
+      <input id="item-rating" placeholder="e.g. 8/10" />
+    `;
+  } else if (category === "jewelry") {
+    fieldsDiv.innerHTML = `
+      <label>What is it made from?</label>
+      <input id="item-madefrom" placeholder="e.g. silver" />
+      <label>What colour is it?</label>
+      <input id="item-colour" placeholder="e.g. gold" />
+    `;
+  } else if (category === "other") {
+    fieldsDiv.innerHTML = `
+      <label>Describe your item:</label>
+      <input id="item-desc" placeholder="What is it?" />
+    `;
+  }
+}
+
+/* 🎀 Add new item */
+function addItem() {
+  const category = document.getElementById("item-category").value;
+  let worth = document.getElementById("item-worth").value.trim();
+  const notes = document.getElementById("item-notes").value.trim();
+  const file = document.getElementById("item-image").files[0];
+
+  if (!category || !worth || !file) {
+    alert("Please choose category, add worth, and upload an image!");
+    return;
+  }
+
+  if (!worth.includes("€")) worth += " €";
+
+  let extraData = {};
+  if (category === "clothes") {
+    extraData = {
+      material: document.getElementById("item-material")?.value.trim(),
+      wear: document.getElementById("item-wear")?.value.trim(),
+      colour: document.getElementById("item-colour")?.value.trim()
+    };
+  } else if (category === "books") {
+    extraData = {
+      genre: document.getElementById("item-genre")?.value.trim(),
+      time: document.getElementById("item-time")?.value.trim(),
+      rating: document.getElementById("item-rating")?.value.trim()
+    };
+  } else if (category === "jewelry") {
+    extraData = {
+      madeFrom: document.getElementById("item-madefrom")?.value.trim(),
+      colour: document.getElementById("item-colour")?.value.trim()
+    };
+  } else if (category === "other") {
+    extraData = {
+      desc: document.getElementById("item-desc")?.value.trim()
+    };
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const itemData = {
+      category,
+      worth,
+      notes,
+      img: e.target.result,
+      ...extraData
+    };
+    swaps.push(itemData);
+    saveSwaps();
+    renderSwaps();
+    updateFeatured();
+    showPopup(itemData);
+    clearForm();
+  };
+  reader.readAsDataURL(file);
+}
+
+/* 🪞 Render swap cards */
+function createItemCard(itemData, index = swaps.length - 1) {
+  const li = document.createElement("li");
+  li.setAttribute("data-index", index);
+  li.innerHTML = `
+    <img src="${itemData.img}" alt="item image" class="item-img" />
+    <strong>${itemData.category.charAt(0).toUpperCase() + itemData.category.slice(1)}</strong><br>
+    ${itemData.material ? `<em>Material:</em> ${itemData.material}<br>` : ""}
+    ${itemData.genre ? `<em>Genre:</em> ${itemData.genre}<br>` : ""}
+    ${itemData.madeFrom ? `<em>Made from:</em> ${itemData.madeFrom}<br>` : ""}
+    ${itemData.colour ? `<em>Colour:</em> ${itemData.colour}<br>` : ""}
+    <em>Worth:</em> ${itemData.worth}<br>
+    ${itemData.notes ? `<small>${itemData.notes}</small><br>` : ""}
+    <div style="margin-top:8px;">
+      <button onclick="editItem(this)">✏️ Edit</button>
+      <button onclick="deleteItem(this)">🗑️ Delete</button>
     </div>
-  </section>
+  `;
+  li.onclick = () => showPopup(itemData);
+  itemList.appendChild(li);
+}
 
-  <nav>
-    <button onclick="showPage('home')">🏠 Home</button>
-    <button onclick="showPage('add')">➕ Add Swap</button>
-    <button onclick="showPage('chat')">💬 Chat</button>
-  </nav>
+/* ✏️ Edit item */
+function editItem(button) {
+  event.stopPropagation();
+  const li = button.closest("li");
+  const index = li.getAttribute("data-index");
+  const item = swaps[index];
 
-  <!-- HOME PAGE -->
-  <section id="home" class="page active">
-    <div id="filter-bar">
-      <label for="filter-category">Filter by:</label>
-      <select id="filter-category" onchange="filterSwaps()">
-        <option value="all">All</option>
-        <option value="clothes">Clothes</option>
-        <option value="books">Books</option>
-        <option value="jewelry">Jewelry</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
+  document.getElementById("item-category").value = item.category;
+  updateCategoryFields();
 
-    <ul id="item-list"></ul>
-  </section>
+  if (item.category === "clothes") {
+    document.getElementById("item-material").value = item.material || "";
+    document.getElementById("item-wear").value = item.wear || "";
+    document.getElementById("item-colour").value = item.colour || "";
+  } else if (item.category === "books") {
+    document.getElementById("item-genre").value = item.genre || "";
+    document.getElementById("item-time").value = item.time || "";
+    document.getElementById("item-rating").value = item.rating || "";
+  } else if (item.category === "jewelry") {
+    document.getElementById("item-madefrom").value = item.madeFrom || "";
+    document.getElementById("item-colour").value = item.colour || "";
+  } else if (item.category === "other") {
+    document.getElementById("item-desc").value = item.desc || "";
+  }
 
-  <!-- ADD SWAP PAGE -->
-  <section id="add" class="page">
-    <h2>Add an Item to Swap 🌷</h2>
-    <div class="form">
-      <label>Your name:</label>
-      <input id="username" placeholder="e.g. Cami" />
-      <button onclick="login()">Login</button>
+  document.getElementById("item-worth").value = item.worth;
+  document.getElementById("item-notes").value = item.notes;
 
-      <label>Category:</label>
-      <select id="item-category" onchange="updateCategoryFields()">
-        <option value="">Select...</option>
-        <option value="clothes">Clothes</option>
-        <option value="books">Books</option>
-        <option value="jewelry">Jewelry</option>
-        <option value="other">Other</option>
-      </select>
+  editingItem = index;
+  const addButton = document.querySelector("button[onclick='addItem()']");
+  addButton.textContent = "Save Changes";
+  addButton.onclick = saveEdit;
+}
 
-      <div id="category-fields"></div>
+/* 💾 Save edit */
+function saveEdit() {
+  if (editingItem === null) return;
 
-      <label>Worth (in €):</label>
-      <input id="item-worth" placeholder="e.g. 20" />
+  const category = document.getElementById("item-category").value;
+  let worth = document.getElementById("item-worth").value.trim();
+  if (!worth.includes("€")) worth += " €";
+  const notes = document.getElementById("item-notes").value.trim();
 
-      <label>Notes:</label>
-      <input id="item-notes" placeholder="extra info..." />
+  let extraData = {};
+  if (category === "clothes") {
+    extraData = {
+      material: document.getElementById("item-material")?.value.trim(),
+      wear: document.getElementById("item-wear")?.value.trim(),
+      colour: document.getElementById("item-colour")?.value.trim()
+    };
+  } else if (category === "books") {
+    extraData = {
+      genre: document.getElementById("item-genre")?.value.trim(),
+      time: document.getElementById("item-time")?.value.trim(),
+      rating: document.getElementById("item-rating")?.value.trim()
+    };
+  } else if (category === "jewelry") {
+    extraData = {
+      madeFrom: document.getElementById("item-madefrom")?.value.trim(),
+      colour: document.getElementById("item-colour")?.value.trim()
+    };
+  } else if (category === "other") {
+    extraData = {
+      desc: document.getElementById("item-desc")?.value.trim()
+    };
+  }
 
-      <label>Image:</label>
-      <input type="file" id="item-image" accept="image/*" />
+  swaps[editingItem] = { ...swaps[editingItem], category, worth, notes, ...extraData };
+  saveSwaps();
+  renderSwaps();
+  updateFeatured();
+  editingItem = null;
+  clearForm();
 
-      <button onclick="addItem()">Add Item</button>
-    </div>
-  </section>
+  const addButton = document.querySelector("button[onclick='saveEdit()']");
+  addButton.textContent = "Add Item";
+  addButton.onclick = addItem;
+}
 
-  <!-- CHAT PAGE -->
-  <section id="chat" class="page">
-    <h2>Community Chat 💬</h2>
-    <div id="chat-box"></div>
-    <div class="chat-input">
-      <input id="chat-input" placeholder="Write your message..." />
-      <button onclick="sendMessage()">Send</button>
-    </div>
-  </section>
+/* 🗑️ Delete item */
+function deleteItem(button) {
+  event.stopPropagation();
+  const li = button.closest("li");
+  const index = li.getAttribute("data-index");
+  if (confirm("Are you sure you want to delete this item?")) {
+    swaps.splice(index, 1);
+    saveSwaps();
+    renderSwaps();
+    updateFeatured();
+  }
+}
 
-  <!-- POPUP -->
-  <div id="popup">
-    <div id="popup-content">
-      <span id="close-popup" onclick="closePopup()">×</span>
-      <img id="popup-img" src="" alt="Swap Image" />
-      <div id="popup-info"></div>
-    </div>
-  </div>
+/* 💾 Save to localStorage */
+function saveSwaps() {
+  localStorage.setItem("swaps", JSON.stringify(swaps));
+}
 
-  <script src="script.js"></script>
-</body>
-</html>
+/* 🪞 Render swaps */
+function renderSwaps() {
+  itemList.innerHTML = "";
+  swaps.forEach((item, index) => createItemCard(item, index));
+  filterSwaps(); // apply filter after rendering
+}
 
+/* 🌟 Featured swap */
+function showFeaturedSwap() {
+  const featuredCard = document.getElementById("featured-card");
+  if (!swaps.length) {
+    featuredCard.innerHTML = `<p>✨ Add your first swap to see it featured here!</p>`;
+    featuredCard.onclick = null;
+    return;
+  }
+
+  const randomItem = swaps[Math.floor(Math.random() * swaps.length)];
+  featuredCard.innerHTML = `
+    <img src="${randomItem.img}" alt="${randomItem.category}" />
+    <strong>${randomItem.category.toUpperCase()}</strong><br>
+    ${random
