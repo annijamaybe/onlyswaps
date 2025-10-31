@@ -3,93 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OnlySwaps 💕</title>
+  <title>OnlySwaps</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
     <h1>OnlySwaps</h1>
-    <p id="welcome">Welcome to OnlySwaps 💕</p>
+    <p id="welcome">Welcome! Please log in below 💕</p>
   </header>
 
-  <nav>
-    <button onclick="showPage('home')">Home</button>
-    <button onclick="showPage('add-swap')">Add Swap</button>
-    <button onclick="showPage('chatroom')">Chatroom</button>
-  </nav>
-
-  <!-- Home -->
-  <section id="home" class="page active">
-    <h2>Your Swaps</h2>
-    <div id="filter-bar">
-      <select id="filter-category" onchange="filterSwaps()">
-        <option value="all">All</option>
-        <option value="clothing">Clothing</option>
-        <option value="books">Books</option>
-        <option value="jewelry">Jewelry</option>
-        <option value="home">Home Decor</option>
-        <option value="other">Other</option>
-      </select>
+  <!-- 🌟 Featured Swap -->
+  <section id="featured-swap">
+    <div class="featured-content">
+      <h2>🌟 Featured Swap</h2>
+      <div id="featured-card" class="featured-card">
+        <p>✨ Add your first swap to see it featured here!</p>
+      </div>
     </div>
-    <ul id="item-list"></ul>
   </section>
 
-  <!-- Add Swap -->
-  <section id="add-swap" class="page">
-    <h2>Add a New Swap ✨</h2>
+  <nav>
+    <button onclick="showPage('login')">Login</button>
+    <button onclick="showPage('swaps')">Swaps</button>
+    <button onclick="showPage('chat')">Chatroom</button>
+  </nav>
 
-    <label>Username:</label>
-    <input type="text" id="username" placeholder="Enter your name" />
-    <button onclick="login()">Save Name</button>
+  <!-- 🩷 Login -->
+  <section id="login" class="page active">
+    <h2>Log In</h2>
+    <input id="username" placeholder="Enter your name" />
+    <button onclick="login()">Login</button>
+  </section>
 
-    <label>Item name:</label>
-    <input type="text" id="item-name" placeholder="What are you swapping?" />
+  <!-- 🎀 Swaps -->
+  <section id="swaps" class="page">
+    <h2>Add a Swap</h2>
 
     <label>Category:</label>
-    <select id="item-category">
-      <option value="clothing">Clothing</option>
+    <select id="item-category" onchange="updateCategoryFields()">
+      <option value="">Select...</option>
+      <option value="clothes">Clothes</option>
       <option value="books">Books</option>
       <option value="jewelry">Jewelry</option>
-      <option value="home">Home Decor</option>
       <option value="other">Other</option>
     </select>
 
-    <label>Material:</label>
-    <input type="text" id="item-material" placeholder="What material is it?" />
+    <div id="category-fields"></div>
 
-    <label>Worth:</label>
-    <input type="text" id="item-worth" placeholder="How do you see it being worth?" />
+    <label>Worth / Estimated Value:</label>
+    <input id="item-worth" placeholder="$ / swap value" />
 
-    <label>Notes:</label>
-    <textarea id="item-notes" placeholder="Anything else to add?"></textarea>
+    <label>Extra Notes:</label>
+    <textarea id="item-notes" placeholder="Add comments, condition, or swap ideas..."></textarea>
 
-    <label>Upload image:</label>
+    <label>Upload Image:</label>
     <input type="file" id="item-image" accept="image/*" />
 
     <button onclick="addItem()">Add Item</button>
+
+    <h2>Your Swaps</h2>
+    <ul id="item-list"></ul>
   </section>
 
-  <!-- Chatroom -->
-  <section id="chatroom" class="page">
-    <h2>💬 Swap Chatroom</h2>
+  <!-- 💬 Chatroom -->
+  <section id="chat" class="page">
+    <h2>Chatroom</h2>
     <div id="chat-box"></div>
-    <input type="text" id="chat-input" placeholder="Type your message..." />
+    <input id="chat-input" placeholder="Type a message..." />
     <button onclick="sendMessage()">Send</button>
   </section>
 
-  <!-- Popup -->
-  <div id="popup">
-    <div id="popup-content">
-      <img id="popup-img" src="" alt="Item image" />
+  <!-- 🌸 Popup -->
+  <div id="popup" onclick="closePopup()">
+    <div id="popup-content" onclick="event.stopPropagation()">
+      <img id="popup-img" />
       <div id="popup-info"></div>
       <button onclick="closePopup()">Close</button>
     </div>
   </div>
 
-  <footer>
-    <p>Made with 💕 by OnlySwaps</p>
-  </footer>
+  <footer>💕 OnlySwaps — Swap, Share, Smile 💕</footer>
 
   <script src="script.js"></script>
 </body>
 </html>
+
