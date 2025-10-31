@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OnlySwaps</title>
+  <title>OnlySwaps 💕</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>OnlySwaps</h1>
-    <p id="welcome">Welcome! Please log in below 💕</p>
+    <h1>OnlySwaps 💕</h1>
+    <p id="welcome">Welcome to OnlySwaps!</p>
   </header>
 
-  <!-- 🌟 Featured Swap -->
   <section id="featured-swap">
     <div class="featured-content">
       <h2>🌟 Featured Swap</h2>
@@ -23,68 +22,78 @@
   </section>
 
   <nav>
-    <button onclick="showPage('login')">Login</button>
-    <button onclick="showPage('swaps')">Swaps</button>
-    <button onclick="showPage('chat')">Chatroom</button>
+    <button onclick="showPage('home')">🏠 Home</button>
+    <button onclick="showPage('add')">➕ Add Swap</button>
+    <button onclick="showPage('chat')">💬 Chat</button>
   </nav>
 
-  <!-- 🩷 Login -->
-  <section id="login" class="page active">
-    <h2>Log In</h2>
-    <input id="username" placeholder="Enter your name" />
-    <button onclick="login()">Login</button>
-  </section>
+  <!-- HOME PAGE -->
+  <section id="home" class="page active">
+    <div id="filter-bar">
+      <label for="filter-category">Filter by:</label>
+      <select id="filter-category" onchange="filterSwaps()">
+        <option value="all">All</option>
+        <option value="clothes">Clothes</option>
+        <option value="books">Books</option>
+        <option value="jewelry">Jewelry</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
 
-  <!-- 🎀 Swaps -->
-  <section id="swaps" class="page">
-    <h2>Add a Swap</h2>
-
-    <label>Category:</label>
-    <select id="item-category" onchange="updateCategoryFields()">
-      <option value="">Select...</option>
-      <option value="clothes">Clothes</option>
-      <option value="books">Books</option>
-      <option value="jewelry">Jewelry</option>
-      <option value="other">Other</option>
-    </select>
-
-    <div id="category-fields"></div>
-
-    <label>Worth / Estimated Value:</label>
-    <input id="item-worth" placeholder="$ / swap value" />
-
-    <label>Extra Notes:</label>
-    <textarea id="item-notes" placeholder="Add comments, condition, or swap ideas..."></textarea>
-
-    <label>Upload Image:</label>
-    <input type="file" id="item-image" accept="image/*" />
-
-    <button onclick="addItem()">Add Item</button>
-
-    <h2>Your Swaps</h2>
     <ul id="item-list"></ul>
   </section>
 
-  <!-- 💬 Chatroom -->
-  <section id="chat" class="page">
-    <h2>Chatroom</h2>
-    <div id="chat-box"></div>
-    <input id="chat-input" placeholder="Type a message..." />
-    <button onclick="sendMessage()">Send</button>
+  <!-- ADD SWAP PAGE -->
+  <section id="add" class="page">
+    <h2>Add an Item to Swap 🌷</h2>
+    <div class="form">
+      <label>Your name:</label>
+      <input id="username" placeholder="e.g. Cami" />
+      <button onclick="login()">Login</button>
+
+      <label>Category:</label>
+      <select id="item-category" onchange="updateCategoryFields()">
+        <option value="">Select...</option>
+        <option value="clothes">Clothes</option>
+        <option value="books">Books</option>
+        <option value="jewelry">Jewelry</option>
+        <option value="other">Other</option>
+      </select>
+
+      <div id="category-fields"></div>
+
+      <label>Worth (in €):</label>
+      <input id="item-worth" placeholder="e.g. 20" />
+
+      <label>Notes:</label>
+      <input id="item-notes" placeholder="extra info..." />
+
+      <label>Image:</label>
+      <input type="file" id="item-image" accept="image/*" />
+
+      <button onclick="addItem()">Add Item</button>
+    </div>
   </section>
 
-  <!-- 🌸 Popup -->
-  <div id="popup" onclick="closePopup()">
-    <div id="popup-content" onclick="event.stopPropagation()">
-      <img id="popup-img" />
+  <!-- CHAT PAGE -->
+  <section id="chat" class="page">
+    <h2>Community Chat 💬</h2>
+    <div id="chat-box"></div>
+    <div class="chat-input">
+      <input id="chat-input" placeholder="Write your message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </section>
+
+  <!-- POPUP -->
+  <div id="popup">
+    <div id="popup-content">
+      <span id="close-popup" onclick="closePopup()">×</span>
+      <img id="popup-img" src="" alt="Swap Image" />
       <div id="popup-info"></div>
-      <button onclick="closePopup()">Close</button>
     </div>
   </div>
-
-  <footer>💕 OnlySwaps — Swap, Share, Smile 💕</footer>
 
   <script src="script.js"></script>
 </body>
 </html>
-
