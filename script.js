@@ -1,319 +1,151 @@
 let username = "";
-let chatBox = document.getElementById("chat-box");
-let itemList = document.getElementById("item-list");
-let editingItem = null;
 let swaps = JSON.parse(localStorage.getItem("swaps")) || [];
+let editingItem = null;
+const itemList = document.getElementById("item-list");
+const chatBox = document.getElementById("chat-box");
 
 /* 🌸 Switch pages */
-function showPage(pageId) {
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+function showPage(pageId){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById(pageId).classList.add("active");
 }
 
 /* 💕 Login */
-function login() {
+function login(){
   username = document.getElementById("username").value.trim();
-  if (username) {
-    document.getElementById("welcome").innerText = `Welcome to OnlySwaps, ${username}! 💕`;
-    localStorage.setItem("username", username);
+  if(username) document.getElementById("welcome").innerText = `Welcome to OnlySwaps, ${username}! 💕`;
+}
+
+/* 🌷 Category fields */
+function updateCategoryFields(){
+  const category = document.getElementById("item-category").value;
+  const div = document.getElementById("category-fields");
+  div.innerHTML = "";
+  if(category==="clothes"){
+    div.innerHTML=`<label>Material:</label><input id="item-material"/><label>Wear:</label><input id="item-wear"/><label>Colour:</label><input id="item-colour"/>`;
+  }else if(category==="books"){
+    div.innerHTML=`<label>Genre:</label><input id="item-genre"/><label>Time owned:</label><input id="item-time"/><label>Rating:</label><input id="item-rating"/>`;
+  }else if(category==="jewelry"){
+    div.innerHTML=`<label>Made from:</label><input id="item-madefrom"/><label>Colour:</label><input id="item-colour"/>`;
+  }else if(category==="other"){
+    div.innerHTML=`<label>Description:</label><input id="item-desc"/>`;
   }
 }
 
-/* 🌷 Update category fields dynamically */
-function updateCategoryFields() {
-  const category = document.getElementById("item-category").value;
-  const fieldsDiv = document.getElementById("category-fields");
-  fieldsDiv.innerHTML = "";
+/* 🎀 Add Item */
+function addItem(){
+  const category=document.getElementById("item-category").value;
+  let worth=document.getElementById("item-worth").value.trim();
+  const notes=document.getElementById("item-notes").value.trim();
+  const file=document.getElementById("item-image").files[0];
+  if(!category||!worth||!file){alert("Category, worth & image required!"); return;}
+  if(!worth.includes("€")) worth+=" €";
 
-  if (category === "clothes") {
-    fieldsDiv.innerHTML = `
-      <label>Material:</label>
-      <input id="item-material" placeholder="e.g. cotton" />
-      <label>Wear level:</label>
-      <input id="item-wear" placeholder="e.g. lightly used" />
-      <label>Colour:</label>
-      <input id="item-colour" placeholder="e.g. pastel pink" />
-    `;
-  } else if (category === "books") {
-    fieldsDiv.innerHTML = `
-      <label>Genre:</label>
-      <input id="item-genre" placeholder="e.g. fantasy" />
-      <label>Time owned:</label>
-      <input id="item-time" placeholder="e.g. 2 years" />
-      <label>Rating:</label>
-      <input id="item-rating" placeholder="e.g. 8/10" />
-    `;
-  } else if (category === "jewelry") {
-    fieldsDiv.innerHTML = `
-      <label>Made from:</label>
-      <input id="item-madefrom" placeholder="e.g. silver" />
-      <label>Colour:</label>
-      <input id="item-colour" placeholder="e.g. gold" />
-    `;
-  } else if (category === "other") {
-    fieldsDiv.innerHTML = `
-      <label>Description:</label>
-      <input id="item-desc" placeholder="What is it?" />
-    `;
-  }
-}
+  let extra={};
+  if(category==="clothes"){extra={material:document.getElementById("item-material")?.value,wear:document.getElementById("item-wear")?.value,colour:document.getElementById("item-colour")?.value};}
+  else if(category==="books"){extra={genre:document.getElementById("item-genre")?.value,time:document.getElementById("item-time")?.value,rating:document.getElementById("item-rating")?.value};}
+  else if(category==="jewelry"){extra={madeFrom:document.getElementById("item-madefrom")?.value,colour:document.getElementById("item-colour")?.value};}
+  else if(category==="other"){extra={desc:document.getElementById("item-desc")?.value};}
 
-/* 🎀 Add new item */
-function addItem() {
-  const category = document.getElementById("item-category").value;
-  let worth = document.getElementById("item-worth").value.trim();
-  const notes = document.getElementById("item-notes").value.trim();
-  const file = document.getElementById("item-image").files[0];
-
-  if (!category || !worth || !file) {
-    alert("Please select category, enter worth, and upload an image!");
-    return;
-  }
-
-  if (!worth.includes("€")) worth += " €";
-
-  let extraData = {};
-  if (category === "clothes") {
-    extraData = {
-      material: document.getElementById("item-material")?.value.trim(),
-      wear: document.getElementById("item-wear")?.value.trim(),
-      colour: document.getElementById("item-colour")?.value.trim()
-    };
-  } else if (category === "books") {
-    extraData = {
-      genre: document.getElementById("item-genre")?.value.trim(),
-      time: document.getElementById("item-time")?.value.trim(),
-      rating: document.getElementById("item-rating")?.value.trim()
-    };
-  } else if (category === "jewelry") {
-    extraData = {
-      madeFrom: document.getElementById("item-madefrom")?.value.trim(),
-      colour: document.getElementById("item-colour")?.value.trim()
-    };
-  } else if (category === "other") {
-    extraData = {
-      desc: document.getElementById("item-desc")?.value.trim()
-    };
-  }
-
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const itemData = {
-      category,
-      worth,
-      notes,
-      img: e.target.result,
-      ...extraData
-    };
-    swaps.push(itemData);
-    saveSwaps();
-    renderSwaps();
-    updateFeatured();
-    showPopup(itemData);
-    clearForm();
+  const reader=new FileReader();
+  reader.onload=function(e){
+    swaps.push({category,worth,notes,img:e.target.result,...extra});
+    localStorage.setItem("swaps",JSON.stringify(swaps));
+    renderSwaps(); updateFeatured(); showPopup(swaps[swaps.length-1]); clearForm();
   };
   reader.readAsDataURL(file);
 }
 
-/* 🪞 Render swap cards */
-function createItemCard(itemData, index = swaps.length - 1) {
-  const li = document.createElement("li");
-  li.setAttribute("data-index", index);
-  li.innerHTML = `
-    <img src="${itemData.img}" alt="item image" class="item-img" />
-    <strong>${itemData.category.charAt(0).toUpperCase() + itemData.category.slice(1)}</strong><br>
-    ${itemData.material ? `<em>Material:</em> ${itemData.material}<br>` : ""}
-    ${itemData.genre ? `<em>Genre:</em> ${itemData.genre}<br>` : ""}
-    ${itemData.madeFrom ? `<em>Made from:</em> ${itemData.madeFrom}<br>` : ""}
-    ${itemData.colour ? `<em>Colour:</em> ${itemData.colour}<br>` : ""}
-    ${itemData.time ? `<em>Time owned:</em> ${itemData.time}<br>` : ""}
-    ${itemData.rating ? `<em>Rating:</em> ${itemData.rating}<br>` : ""}
-    ${itemData.desc ? `<em>Description:</em> ${itemData.desc}<br>` : ""}
-    <em>Worth:</em> ${itemData.worth}<br>
-    ${itemData.notes ? `<small>${itemData.notes}</small><br>` : ""}
-    <div style="margin-top:8px;">
-      <button onclick="editItem(this)">✏️ Edit</button>
-      <button onclick="deleteItem(this)">🗑️ Delete</button>
-    </div>
-  `;
-  li.onclick = () => showPopup(itemData);
+/* 🪞 Render */
+function createItemCard(item,index){
+  const li=document.createElement("li");
+  li.setAttribute("data-index",index);
+  li.innerHTML=`<img src="${item.img}" class="item-img"/>
+  <strong>${item.category}</strong><br>
+  ${item.material?`Material:${item.material}<br>`:""}
+  ${item.wear?`Wear:${item.wear}<br>`:""}
+  ${item.colour?`Colour:${item.colour}<br>`:""}
+  ${item.genre?`Genre:${item.genre}<br>`:""}
+  ${item.time?`Time:${item.time}<br>`:""}
+  ${item.rating?`Rating:${item.rating}<br>`:""}
+  ${item.madeFrom?`Made from:${item.madeFrom}<br>`:""}
+  ${item.desc?`Description:${item.desc}<br>`:""}
+  Worth:${item.worth}<br>
+  ${item.notes?`Notes:${item.notes}`:""}
+  <div><button onclick="editItem(this)">✏️ Edit</button><button onclick="deleteItem(this)">🗑️ Delete</button></div>`;
+  li.onclick=()=>showPopup(item);
   itemList.appendChild(li);
 }
 
-/* ✏️ Edit item */
-function editItem(button) {
-  event.stopPropagation();
-  const li = button.closest("li");
-  const index = li.getAttribute("data-index");
-  const item = swaps[index];
+function renderSwaps(){itemList.innerHTML="";swaps.forEach((item,index)=>createItemCard(item,index));filterSwaps();}
 
-  document.getElementById("item-category").value = item.category;
-  updateCategoryFields();
+/* ✏️ Edit/Delete */
+function editItem(btn){event.stopPropagation();const li=btn.closest("li");const index=li.getAttribute("data-index");const item=swaps[index];document.getElementById("item-category").value=item.category;updateCategoryFields();if(item.category==="clothes"){document.getElementById("item-material").value=item.material;document.getElementById("item-wear").value=item.wear;document.getElementById("item-colour").value=item.colour;}
+else if(item.category==="books"){document.getElementById("item-genre").value=item.genre;document.getElementById("item-time").value=item.time;document.getElementById("item-rating").value=item.rating;}
+else if(item.category==="jewelry"){document.getElementById("item-madefrom").value=item.madeFrom;document.getElementById("item-colour").value=item.colour;}
+else if(item.category==="other"){document.getElementById("item-desc").value=item.desc;}
+document.getElementById("item-worth").value=item.worth;document.getElementById("item-notes").value=item.notes;
+editingItem=index;const addBtn=document.querySelector("button[onclick='addItem()']");addBtn.textContent="Save Changes";addBtn.onclick=saveEdit;}
 
-  if (item.category === "clothes") {
-    document.getElementById("item-material").value = item.material || "";
-    document.getElementById("item-wear").value = item.wear || "";
-    document.getElementById("item-colour").value = item.colour || "";
-  } else if (item.category === "books") {
-    document.getElementById("item-genre").value = item.genre || "";
-    document.getElementById("item-time").value = item.time || "";
-    document.getElementById("item-rating").value = item.rating || "";
-  } else if (item.category === "jewelry") {
-    document.getElementById("item-madefrom").value = item.madeFrom || "";
-    document.getElementById("item-colour").value = item.colour || "";
-  } else if (item.category === "other") {
-    document.getElementById("item-desc").value = item.desc || "";
-  }
+function saveEdit(){if(editingItem===null)return;const category=document.getElementById("item-category").value;let worth=document.getElementById("item-worth").value.trim();if(!worth.includes("€")) worth+=" €";const notes=document.getElementById("item-notes").value.trim();let extra={};if(category==="clothes"){extra={material:document.getElementById("item-material")?.value,wear:document.getElementById("item-wear")?.value,colour:document.getElementById("item-colour")?.value};}else if(category==="books"){extra={genre:document.getElementById("item-genre")?.value,time:document.getElementById("item-time")?.value,rating:document.getElementById("item-rating")?.value};}else if(category==="jewelry"){extra={madeFrom:document.getElementById("item-madefrom")?.value,colour:document.getElementById("item-colour")?.value};}else if(category==="other"){extra={desc:document.getElementById("item-desc")?.value};}swaps[editingItem]={...swaps[editingItem],category,worth,notes,...extra};localStorage.setItem("swaps",JSON.stringify(swaps));renderSwaps();updateFeatured();editingItem=null;clearForm();const addBtn=document.querySelector("button[onclick='saveEdit()']");addBtn.textContent="Add Item";addBtn.onclick=addItem;}
 
-  document.getElementById("item-worth").value = item.worth;
-  document.getElementById("item-notes").value = item.notes;
+function deleteItem(btn){event.stopPropagation();const li=btn.closest("li");const index=li.getAttribute("data-index");if(confirm("Delete this item?")){swaps.splice(index,1);localStorage.setItem("swaps",JSON.stringify(swaps));renderSwaps();updateFeatured();}}
 
-  editingItem = index;
-  const addButton = document.querySelector("button[onclick='addItem()']");
-  addButton.textContent = "Save Changes";
-  addButton.onclick = saveEdit;
-}
-
-/* 💾 Save edit */
-function saveEdit() {
-  if (editingItem === null) return;
-
-  const category = document.getElementById("item-category").value;
-  let worth = document.getElementById("item-worth").value.trim();
-  if (!worth.includes("€")) worth += " €";
-  const notes = document.getElementById("item-notes").value.trim();
-
-  let extraData = {};
-  if (category === "clothes") {
-    extraData = {
-      material: document.getElementById("item-material")?.value.trim(),
-      wear: document.getElementById("item-wear")?.value.trim(),
-      colour: document.getElementById("item-colour")?.value.trim()
-    };
-  } else if (category === "books") {
-    extraData = {
-      genre: document.getElementById("item-genre")?.value.trim(),
-      time: document.getElementById("item-time")?.value.trim(),
-      rating: document.getElementById("item-rating")?.value.trim()
-    };
-  } else if (category === "jewelry") {
-    extraData = {
-      madeFrom: document.getElementById("item-madefrom")?.value.trim(),
-      colour: document.getElementById("item-colour")?.value.trim()
-    };
-  } else if (category === "other") {
-    extraData = {
-      desc: document.getElementById("item-desc")?.value.trim()
-    };
-  }
-
-  swaps[editingItem] = { ...swaps[editingItem], category, worth, notes, ...extraData };
-  saveSwaps();
-  renderSwaps();
-  updateFeatured();
-  editingItem = null;
-  clearForm();
-
-  const addButton = document.querySelector("button[onclick='saveEdit()']");
-  addButton.textContent = "Add Item";
-  addButton.onclick = addItem;
-}
-
-/* 🗑️ Delete item */
-function deleteItem(button) {
-  event.stopPropagation();
-  const li = button.closest("li");
-  const index = li.getAttribute("data-index");
-  if (confirm("Are you sure you want to delete this item?")) {
-    swaps.splice(index, 1);
-    saveSwaps();
-    renderSwaps();
-    updateFeatured();
-  }
-}
-
-/* 💾 Save to localStorage */
-function saveSwaps() {
-  localStorage.setItem("swaps", JSON.stringify(swaps));
-}
-
-/* 🪞 Render swaps */
-function renderSwaps() {
-  itemList.innerHTML = "";
-  swaps.forEach((item, index) => createItemCard(item, index));
-  filterSwaps();
-}
-
-/* 🌟 Featured swap */
-function updateFeatured() {
-  const featuredCard = document.getElementById("featured-card");
-  if (!swaps.length) {
-    featuredCard.innerHTML = `<p>✨ Add your first swap to see it featured here!</p>`;
-    featuredCard.onclick = null;
-    return;
-  }
-
-  const randomItem = swaps[Math.floor(Math.random() * swaps.length)];
-  featuredCard.innerHTML = `
-    <img src="${randomItem.img}" alt="${randomItem.category}" />
-    <strong>${randomItem.category.toUpperCase()}</strong><br>
-    ${randomItem.worth}<br>
-    ${randomItem.notes ? `<small>${randomItem.notes}</small>` : ""}
-  `;
-  featuredCard.onclick = () => showPopup(randomItem);
-}
-
-/* 💬 Chat */
-function sendMessage() {
-  const msg = document.getElementById("chat-input").value.trim();
-  if (!msg) return;
-  const msgDiv = document.createElement("div");
-  msgDiv.innerHTML = `<strong>${username || "Anon"}:</strong> ${msg}`;
-  chatBox.appendChild(msgDiv);
-  chatBox.scrollTop = chatBox.scrollHeight;
-  document.getElementById("chat-input").value = "";
+/* 🌟 Featured */
+function updateFeatured(){
+  const fc=document.getElementById("featured-card");
+  if(!swaps.length){fc.innerHTML=`<p>✨ Add your first swap to see it featured here!</p>`; fc.onclick=null; return;}
+  const randomItem=swaps[Math.floor(Math.random()*swaps.length)];
+  fc.innerHTML=`<img src="${randomItem.img}" /><strong>${randomItem.category.toUpperCase()}</strong><br>${randomItem.worth}`;
+  fc.onclick=()=>showPopup(randomItem);
 }
 
 /* 🌸 Popup */
-function showPopup(item) {
-  document.getElementById("popup-img").src = item.img;
-  let info = `<strong>${item.category.toUpperCase()}</strong><br>${item.worth}<br>`;
-  if (item.material) info += `Material: ${item.material}<br>`;
-  if (item.wear) info += `Wear: ${item.wear}<br>`;
-  if (item.colour) info += `Colour: ${item.colour}<br>`;
-  if (item.genre) info += `Genre: ${item.genre}<br>`;
-  if (item.time) info += `Time owned: ${item.time}<br>`;
-  if (item.rating) info += `Rating: ${item.rating}<br>`;
-  if (item.madeFrom) info += `Made from: ${item.madeFrom}<br>`;
-  if (item.desc) info += `Description: ${item.desc}<br>`;
-  if (item.notes) info += `Notes: ${item.notes}<br>`;
-  document.getElementById("popup-info").innerHTML = info;
-  document.getElementById("popup").style.display = "flex";
+function showPopup(item){
+  document.getElementById("popup-img").src=item.img;
+  let info=`<strong>${item.category.toUpperCase()}</strong><br>Worth: ${item.worth}<br>`;
+  if(item.material) info+=`Material: ${item.material}<br>`;
+  if(item.wear) info+=`Wear: ${item.wear}<br>`;
+  if(item.colour) info+=`Colour: ${item.colour}<br>`;
+  if(item.genre) info+=`Genre: ${item.genre}<br>`;
+  if(item.time) info+=`Time: ${item.time}<br>`;
+  if(item.rating) info+=`Rating: ${item.rating}<br>`;
+  if(item.madeFrom) info+=`Made from: ${item.madeFrom}<br>`;
+  if(item.desc) info+=`Description: ${item.desc}<br>`;
+  if(item.notes) info+=`Notes: ${item.notes}<br>`;
+  document.getElementById("popup-info").innerHTML=info;
+  document.getElementById("popup").style.display="flex";
 }
 
-function closePopup() {
-  document.getElementById("popup").style.display = "none";
-}
+function closePopup(){document.getElementById("popup").style.display="none";}
 
-/* 🌸 Filter swaps */
-function filterSwaps() {
-  const filterValue = document.getElementById("filter-category").value;
-  itemList.innerHTML = "";
-  const filtered = filterValue === "all"
-    ? swaps
-    : swaps.filter(item => item.category === filterValue);
-  if (!filtered.length) {
-    itemList.innerHTML = `<p style="text-align:center;color:#d45b7a;">No swaps found in this category 💭</p>`;
-    return;
-  }
-  filtered.forEach((item, index) => createItemCard(item, index));
+/* 🌸 Filter */
+function filterSwaps(){
+  const val=document.getElementById("filter-category").value;
+  itemList.innerHTML="";
+  const filtered=val==="all"?swaps:swaps.filter(s=>s.category===val);
+  if(!filtered.length){itemList.innerHTML="<p style='text-align:center;color:#d45b7a;'>No swaps found</p>"; return;}
+  filtered.forEach((item,index)=>createItemCard(item,index));
 }
 
 /* 🌸 Clear form */
-function clearForm() {
-  document.getElementById("item-category").value = "";
-  document.getElementById("item-worth").value = "";
-  document.getElementById("item-notes").value = "";
-  document.getElementById("item-image").value = "";
-  document.getElementById("category
+function clearForm(){
+  document.getElementById("item-category").value="";
+  document.getElementById("item-worth").value="";
+  document.getElementById("item-notes").value="";
+  document.getElementById("item-image").value="";
+  document.getElementById("category-fields").innerHTML="";
+}
 
+/* 💬 Chat */
+function sendMessage(){
+  const msg=document.getElementById("chat-input").value.trim();
+  if(!msg) return;
+  const div=document.createElement("div");
+  div.innerHTML=`<strong>${username||"Anon"}:</strong> ${msg}`;
+  chatBox.appendChild(div);
+  chatBox.scrollTop=chatBox.scrollHeight;
+  document.getElementById("chat-input").value="";
+}
+
+/*
